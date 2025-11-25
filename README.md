@@ -6,6 +6,8 @@
 **Bhaasha Setu** is an advanced AI-powered chatbot designed to bridge linguistic barriers across India. It specializes in **transliterating** text between various Indian scripts, enabling users to read content in their familiar script while preserving the original phonetic sound and language.
 
 > **Core Principle:** "Only change the script, never the language or meaning."
+>
+> 💡 **Inspiration:** This project idea is based on a problem statement from the **Smart India Hackathon (SIH)**.
 
 ## 🚀 Features
 
