@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Image, X, Bot, User, Sparkles } from "lucide-react";
+import { Send, Image as ImageIcon, X, Bot, User, Sparkles, Loader2 } from "lucide-react";
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL;
@@ -26,9 +26,9 @@ Devanagari (Hindi, Marathi, Sanskrit, Nepali)
 
  Bengali–Assamese
 
-Gujarati
+ Gujarati
 
-Odia (Oriya)
+ Odia (Oriya)
 
  Gurmukhi (Punjabi)
 
@@ -44,11 +44,11 @@ Odia (Oriya)
 
  Malayalam
 
-Other:
+ Other:
 
  Perso-Arabic (Urdu)
 
-Sharada, Grantha
+ Sharada, Grantha
 
  Ancient: Brahmi, Kharosthi, Indus Script
 
@@ -93,7 +93,7 @@ const App = () => {
     {
       role: "assistant",
       content:
-        "Hello! My self Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image with Indian script text, and I'll convert it while preserving pronunciation.",
+        "Hello! I am Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image, and I'll convert it while preserving pronunciation.",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -113,7 +113,7 @@ const App = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isTyping]);
 
   const callGroq = async (userContent, imageFile) => {
     let imageBase64 = null;
@@ -132,11 +132,11 @@ const App = () => {
         { type: "text", text: userContent || "" },
         ...(imageBase64
           ? [
-              {
-                type: "image_url",
-                image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
-              },
-            ]
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+            },
+          ]
           : []),
       ],
     };
@@ -211,7 +211,7 @@ const App = () => {
         ...prev,
         {
           role: "assistant",
-          content: "⚠️ Error contacting Groq API.",
+          content: "⚠️ Error contacting Groq API. Please try again.",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -232,166 +232,141 @@ const App = () => {
   };
 
   const TypingIndicator = () => (
-    <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 p-2 sm:p-3 md:p-4">
-      {/* Bot Icon */}
-      <div className="w-7 h-7 sm:w-15 sm:h-8 md:w-9 md:h-9 flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full px-2">
-        <Bot size={16} />
+    <div className="flex items-start space-x-3 animate-fade-in-up">
+      <div className="w-8 h-8 flex items-center justify-center bg-white text-indigo-600 rounded-full shrink-0 shadow-sm border border-indigo-100">
+        <Bot size={18} />
       </div>
-
-      {/* Typing Dots */}
-      <div className="bg-white p-2 sm:p-3 md:p-4 rounded-2xl shadow-sm border">
-        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
-          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce"></div>
-          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+      <div className="bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-white/50">
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-100"></div>
+          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-200"></div>
         </div>
       </div>
     </div>
   );
+
   return (
-    <div className="fixed inset-0 min-h-full border-box w-full bg-gradient-to-br from-orange-500 via-[#ffffff] to-green-600 flex flex-col">
-      <div
-        className="flex-1 flex flex-col h-full w-full 
-    bg-white/80 backdrop-blur-xl 
-    rounded-none sm:rounded-3xl 
-    shadow-2xl 
-    overflow-hidden max-w-screen-lg mx-auto border-2 border-[#dadada]"
-      >
-        {/* Header */}
-        <div
-          className="bg-gradient-to-r from-pink-500 via-[#ffffff] to-blue-600
-      p-3 sm:p-4 md:p-6 text-white w-full"
-        >
-          <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <Sparkles size={20} className="text-blue-900" />
+    <div className="h-screen w-full bg-slate-50 flex flex-col font-sans text-slate-900 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat relative">
+      <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-0"></div>
+
+      {/* Header */}
+      <header className="bg-white/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-20 px-4 py-4 sm:px-6 shadow-sm">
+        <div className="max-w-5xl mx-auto flex items-center justify-between relative z-10">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white ring-4 ring-white/50">
+              <Sparkles size={24} />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl md:text-2xl text-blue-900 font-bold tracking-wide">
-                bhaasha Setu
+              <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                Bhaasha Setu
               </h1>
-              <p className=" text-[10px] text-blue-900 sm:text-xs md:text-sm">
+              <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">
                 Indian Script Transliterator
               </p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-semibold border border-indigo-100">
+              Beta
+            </div>
+          </div>
         </div>
+      </header>
 
-        {/* Messages */}
-        <img className="absolute top-[25%] right-[35%] " src="chakra.png" alt="" />
-        <div
-          className="flex-1 overflow-y-auto 
-      p-2 sm:p-4 md:p-6 
-      space-y-3 sm:space-y-4 md:space-y-6 
-      bg-gradient-to-b from-gray-50/80 to-white/50 w-full relative "
-        >
-          
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scroll-smooth relative z-10">
+        <div className="max-w-4xl mx-auto space-y-6 pb-4">
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              } animate-fade-in`}
+              className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"
+                } animate-fade-in-up`}
             >
-              <div className="flex items-end space-x-2 sm:space-x-3 max-w-[90%] sm:max-w-[85%]">
-                {msg.role === "assistant" && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full mb-1 px-2">
-                    <Bot size={16} className="" />
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <div
-                    className={`p-2 sm:p-3 md:p-4 rounded-2xl shadow-lg border text-sm sm:text-base leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-blue-200 text-black rounded-br-md border-blue-200  z-50"
-                        : "bg-white text-gray-800 rounded-bl-md border-gray-100  z-50"
+              <div
+                className={`flex max-w-[85%] sm:max-w-[75%] gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
+              >
+                {/* Avatar */}
+                <div
+                  className={`w-9 h-9 flex items-center justify-center rounded-full shrink-0 shadow-sm border ${msg.role === "user"
+                      ? "bg-indigo-600 text-white border-indigo-500"
+                      : "bg-white text-indigo-600 border-indigo-100"
                     }`}
+                >
+                  {msg.role === "user" ? <User size={18} /> : <Bot size={20} />}
+                </div>
+
+                {/* Bubble */}
+                <div className="flex flex-col space-y-1">
+                  <div
+                    className={`px-6 py-4 shadow-md text-sm sm:text-base leading-relaxed backdrop-blur-sm ${msg.role === "user"
+                        ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-2xl rounded-tr-none border border-indigo-500/20"
+                        : "bg-white/80 border border-white/50 text-slate-800 rounded-2xl rounded-tl-none"
+                      }`}
                   >
                     {msg.image && (
-                      <div className="mb-3 rounded-xl overflow-hidden">
+                      <div className="mb-3 rounded-lg overflow-hidden bg-black/5 border border-black/5">
                         <img
                           src={URL.createObjectURL(msg.image)}
                           alt="uploaded"
-                          className="max-h-36 sm:max-h-40 md:max-h-48 w-full object-cover"
+                          className="max-h-60 w-full object-contain"
                         />
                       </div>
                     )}
                     <div className="whitespace-pre-wrap">{msg.content}</div>
                   </div>
-                  <div
-                    className={`text-[9px] sm:text-[10px] md:text-xs text-gray-400 mt-1 ${
-                      msg.role === "user" ? "text-right" : "text-left"
-                    }`}
+                  <span
+                    className={`text-[10px] sm:text-xs font-medium ${msg.role === "user" ? "text-right text-indigo-900/40" : "text-left text-slate-500"
+                      }`}
                   >
                     {msg.timestamp}
-                  </div>
+                  </span>
                 </div>
-                {msg.role === "user" && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full mb-1">
-                    <User size={16} />
-                  </div>
-                )}
               </div>
             </div>
           ))}
           {isTyping && <TypingIndicator />}
           <div ref={messagesEndRef} />
         </div>
+      </div>
 
-        {/* Input */}
-        <div className="border-t border-gray-200/50 bg-white/80 p-2 sm:p-3 md:p-4 w-full">
+      {/* Input Area */}
+      <div className="p-4 sm:p-6 sticky bottom-0 z-20 relative z-20">
+        <div className="max-w-5xl mx-auto w-full">
           {selectedImage && (
-            <div className="mb-3 flex items-center space-x-3 bg-blue-50 p-2 sm:p-3 rounded-xl border border-blue-200">
-              <img
-                src={URL.createObjectURL(selectedImage)}
-                alt="preview"
-                className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 object-cover rounded-lg shadow-sm"
-              />
-              <div className="flex-1 text-xs sm:text-sm text-gray-600 truncate">
-                <p className="font-medium">Image selected</p>
-                <p className="text-[10px] sm:text-xs truncate">
+            <div className="mb-4 flex items-center gap-3 bg-white/80 backdrop-blur-md p-2.5 rounded-xl border border-white/50 w-fit animate-fade-in-up shadow-lg shadow-black/5">
+              <div className="h-12 w-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                <img
+                  src={URL.createObjectURL(selectedImage)}
+                  alt="preview"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-slate-700">
+                  Image attached
+                </span>
+                <span className="text-[10px] text-slate-500 max-w-[150px] truncate">
                   {selectedImage.name}
-                </p>
+                </span>
               </div>
               <button
                 onClick={() => setSelectedImage(null)}
-                className="text-red-500 hover:text-red-600 p-1 hover:bg-red-50 rounded-full"
+                className="ml-2 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
           )}
-          <div className="flex flex-wrap items-end gap-2 sm:gap-3">
-            {/* Textarea */}
-            <div className="flex-1 relative min-w-[200px]">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="w-full border border-gray-300 rounded-xl 
-              p-2 sm:p-3 pr-10 
-              focus:ring-2 focus:ring-purple-400 focus:border-transparent 
-              outline-none resize-none bg-white/90 text-gray-800 
-              placeholder-gray-400 shadow-sm 
-              text-sm sm:text-base"
-                rows="1"
-                style={{ minHeight: "44px", maxHeight: "120px" }}
-                onInput={(e) => {
-                  e.target.style.height = "44px";
-                  e.target.style.height =
-                    Math.min(e.target.scrollHeight, 120) + "px";
-                }}
-              />
-            </div>
 
-            {/* Upload Button */}
+          <div className="relative flex items-end gap-3 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl p-2 shadow-xl shadow-indigo-500/10 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/50 transition-all">
             <button
               onClick={() => fileInputRef.current.click()}
-              className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 rounded-xl shadow-sm hover:shadow-md border border-gray-200"
+              className="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-colors"
               title="Upload image"
             >
-              <Image size={18} className="text-gray-600" />
+              <ImageIcon size={22} />
             </button>
             <input
               type="file"
@@ -401,19 +376,37 @@ const App = () => {
               onChange={(e) => setSelectedImage(e.target.files[0])}
             />
 
-            {/* Send Button */}
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message in any Indian script..."
+              className="flex-1 bg-transparent border-none focus:ring-0 p-3 text-slate-800 placeholder-slate-500 resize-none max-h-32 min-h-[48px] text-sm sm:text-base font-medium"
+              rows="1"
+              style={{ height: "auto" }}
+              onInput={(e) => {
+                e.target.style.height = "auto";
+                e.target.style.height = Math.min(e.target.scrollHeight, 128) + "px";
+              }}
+            />
+
             <button
               onClick={handleSend}
               disabled={isLoading || (!inputText.trim() && !selectedImage)}
-              className="p-2 sm:p-3 bg-gradient-to-r from-purple-500 to-blue-500  
-            hover:from-purple-600 hover:to-blue-600 
-            disabled:from-gray-300 disabled:to-gray-400 
-            text-white rounded-xl shadow-lg hover:shadow-xl 
-            transform hover:scale-105 disabled:scale-100"
+              className="p-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:from-slate-300 disabled:to-slate-300 text-white rounded-2xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 disabled:shadow-none transition-all transform active:scale-95"
               title="Send message"
             >
-              <Send size={18} />
+              {isLoading ? (
+                <Loader2 size={22} className="animate-spin" />
+              ) : (
+                <Send size={22} />
+              )}
             </button>
+          </div>
+          <div className="mt-3 text-center">
+            <p className="text-[10px] text-slate-500 font-medium tracking-wide opacity-60">
+              AI can make mistakes. Please verify important information.
+            </p>
           </div>
         </div>
       </div>
