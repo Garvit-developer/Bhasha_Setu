@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Image as ImageIcon, X, Bot, User, Sparkles, Loader2, MessageSquare, Plus, Menu, Trash2, History, ChevronLeft } from "lucide-react";
+import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
+import ChatArea from "./components/ChatArea";
+import InputArea from "./components/InputArea";
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL;
@@ -116,7 +119,11 @@ const App = () => {
 
   // Initialize with a new chat if no sessions or just to start fresh
   useEffect(() => {
-    if (!currentSessionId && messages.length === 1 && messages[0].role === "assistant") {
+    if (
+      !currentSessionId &&
+      messages.length === 1 &&
+      messages[0].role === "assistant"
+    ) {
       // It's a fresh state, do nothing or maybe create a session ID only when user types?
       // Let's create a session ID only when the first message is sent to avoid empty sessions.
     }
@@ -170,8 +177,6 @@ const App = () => {
       createNewChat();
     }
   };
-
-
 
   const callGroq = async (userContent, imageFile) => {
     let imageBase64 = null;
@@ -330,268 +335,43 @@ const App = () => {
     }
   };
 
-  const TypingIndicator = () => (
-    <div className="flex items-start space-x-3 animate-fade-in-up">
-      <div className="w-8 h-8 flex items-center justify-center bg-white text-indigo-600 rounded-full shrink-0 shadow-sm border border-indigo-100">
-        <Bot size={18} />
-      </div>
-      <div className="bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-white/50">
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
-          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-100"></div>
-          <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-200"></div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="h-screen w-full bg-slate-50 flex font-sans text-slate-900 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat relative overflow-hidden">
       <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-0"></div>
 
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed md:relative z-40 h-full w-72 bg-white/80 backdrop-blur-xl border-r border-white/20 shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          } flex flex-col`}
-      >
-        <div className="p-4 border-b border-slate-200/50">
-          <button
-            onClick={createNewChat}
-            className="w-full flex items-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95"
-          >
-            <Plus size={20} />
-            <span className="font-medium">New Chat</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Recent History
-          </div>
-          {sessions.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-sm">
-              <History size={24} className="mx-auto mb-2 opacity-50" />
-              <p>No chat history yet</p>
-            </div>
-          ) : (
-            sessions.map((session) => (
-              <div
-                key={session.id}
-                onClick={() => loadSession(session.id)}
-                className={`group flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all ${currentSessionId === session.id
-                  ? "bg-indigo-50 text-indigo-700 border border-indigo-100"
-                  : "hover:bg-white/50 text-slate-700 border border-transparent"
-                  }`}
-              >
-                <MessageSquare size={18} className={currentSessionId === session.id ? "text-indigo-600" : "text-slate-400"} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {session.title}
-                  </p>
-                  <p className="text-[10px] text-slate-400">
-                    {new Date(session.timestamp).toLocaleDateString()}
-                  </p>
-                </div>
-                <button
-                  onClick={(e) => deleteSession(e, session.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                  title="Delete chat"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="p-4 border-t border-slate-200/50 bg-white/30">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-              <User size={16} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-700">User</p>
-              <p className="text-xs text-slate-500 truncate">Free Plan</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        sessions={sessions}
+        currentSessionId={currentSessionId}
+        createNewChat={createNewChat}
+        loadSession={loadSession}
+        deleteSession={deleteSession}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full relative w-full md:w-auto">
-        {/* Header */}
-        <header className="bg-white/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-20 px-4 py-4 sm:px-6 shadow-sm">
-          <div className="max-w-5xl mx-auto flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
-              >
-                <Menu size={24} />
-              </button>
+        <Header
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
 
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white ring-4 ring-white/50">
-                  <Sparkles size={20} className="sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <h1 className="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight">
-                    Bhaasha Setu
-                  </h1>
-                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide uppercase">
-                    Indian Script Transliterator
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-semibold border border-indigo-100">
-                Beta
-              </div>
-            </div>
-          </div>
-        </header>
+        <ChatArea
+          messages={messages}
+          isTyping={isTyping}
+          messagesEndRef={messagesEndRef}
+        />
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scroll-smooth relative z-10">
-          <div className="max-w-3xl mx-auto space-y-6 pb-4">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"
-                  } animate-fade-in-up`}
-              >
-                <div
-                  className={`flex max-w-[85%] sm:max-w-[75%] gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                    }`}
-                >
-                  {/* Avatar */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "assistant"
-                    ? "bg-white text-indigo-600 border border-indigo-100 shadow-sm"
-                    : "bg-indigo-600 text-white shadow-md"
-                    }`}>
-                    {msg.role === "assistant" ? <Bot size={18} /> : <User size={18} />}
-                  </div>
-
-                  {/* Message Bubble */}
-                  <div className={`flex flex-col max-w-full ${msg.role === "user" ? "items-end" : "items-start"
-                    }`}>
-                    <div className={`px-4 py-3 rounded-2xl shadow-sm relative group ${msg.role === "assistant"
-                      ? "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
-                      : "bg-indigo-600 text-white rounded-tr-none"
-                      }`}>
-                      {msg.image && (
-                        <div className="mb-3 rounded-lg overflow-hidden">
-                          <img
-                            src={URL.createObjectURL(msg.image)}
-                            alt="Uploaded content"
-                            className="max-w-full h-auto max-h-64 object-cover"
-                          />
-                        </div>
-                      )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {typeof msg.content === 'string' ? msg.content : "Content not available"}
-                      </p>
-                    </div>
-                    <span className="text-[10px] text-slate-400 mt-1 px-1">
-                      {msg.timestamp}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex justify-start animate-fade-in-up">
-                <TypingIndicator />
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="p-4 bg-white/80 backdrop-blur-xl border-t border-white/20">
-          <div className="max-w-3xl mx-auto relative">
-            {selectedImage && (
-              <div className="absolute bottom-full mb-2 left-0 p-2 bg-white rounded-xl shadow-lg border border-slate-100 animate-fade-in-up">
-                <div className="relative">
-                  <img
-                    src={URL.createObjectURL(selectedImage)}
-                    alt="Preview"
-                    className="h-20 w-20 object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={() => setSelectedImage(null)}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 transition-colors"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-end gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
-                title="Upload image"
-              >
-                <ImageIcon size={20} />
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setSelectedImage(e.target.files[0]);
-                  }
-                }}
-              />
-
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Type a message..."
-                className="flex-1 max-h-32 py-3 px-2 bg-transparent border-none focus:ring-0 text-slate-700 placeholder:text-slate-400 resize-none text-sm scrollbar-hide"
-                rows={1}
-                style={{ minHeight: '44px' }}
-              />
-
-              <button
-                onClick={handleSend}
-                disabled={!inputText.trim() && !selectedImage || isLoading}
-                className={`p-3 rounded-xl flex items-center justify-center transition-all ${inputText.trim() || selectedImage
-                  ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-700 active:scale-95"
-                  : "bg-slate-100 text-slate-300 cursor-not-allowed"
-                  }`}
-              >
-                {isLoading ? (
-                  <Loader2 size={20} className="animate-spin" />
-                ) : (
-                  <Send size={20} />
-                )}
-              </button>
-            </div>
-            <div className="text-center mt-2">
-              <p className="text-[10px] text-slate-400">
-                AI can make mistakes. Please verify important information.
-              </p>
-            </div>
-          </div>
-        </div>
+        <InputArea
+          inputText={inputText}
+          setInputText={setInputText}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+          fileInputRef={fileInputRef}
+          handleSend={handleSend}
+          handleKeyPress={handleKeyPress}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
