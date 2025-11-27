@@ -1,19 +1,36 @@
 import React from "react";
 import { Bot } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TypingIndicator = () => (
-    <div className="flex items-start space-x-3 animate-fade-in-up">
-        <div className="w-8 h-8 flex items-center justify-center bg-white text-indigo-600 rounded-full shrink-0 shadow-sm border border-indigo-100">
-            <Bot size={18} />
+    <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-start space-x-3"
+    >
+        <div className="w-8 h-8 flex items-center justify-center bg-white text-slate-600 rounded-lg shrink-0 border border-slate-200">
+            <Bot size={16} />
         </div>
-        <div className="bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-white/50">
-            <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-100"></div>
-                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-200"></div>
+        <div className="bg-white px-4 py-3 rounded-lg rounded-tl-none border border-slate-200">
+            <div className="flex items-center gap-1 h-4">
+                <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-1.5 h-1.5 bg-slate-400 rounded-full"
+                />
+                <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                    className="w-1.5 h-1.5 bg-slate-400 rounded-full"
+                />
+                <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                    className="w-1.5 h-1.5 bg-slate-400 rounded-full"
+                />
             </div>
         </div>
-    </div>
+    </motion.div>
 );
 
 export default TypingIndicator;

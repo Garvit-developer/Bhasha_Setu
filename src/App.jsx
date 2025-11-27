@@ -92,289 +92,294 @@ Translation (Gurmukhi): "ਸਤ ਸ੍ਰੀ ਅਕਾਲ, ਤੁਸੀਂ ਕ�
 ⚠️ Do not mix transliteration and translation in a single line; keep them separate and clearly labeled.`;
 
 const App = () => {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hello! I am Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image, and I'll convert it while preserving pronunciation.",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ]);
-  const [inputText, setInputText] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const fileInputRef = useRef(null);
-  const messagesEndRef = useRef(null);
-
-  const [sessions, setSessions] = useState(() => {
-    const saved = localStorage.getItem("chat_sessions");
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [currentSessionId, setCurrentSessionId] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Initialize with a new chat if no sessions or just to start fresh
-  useEffect(() => {
-    if (
-      !currentSessionId &&
-      messages.length === 1 &&
-      messages[0].role === "assistant"
-    ) {
-      // It's a fresh state, do nothing or maybe create a session ID only when user types?
-      // Let's create a session ID only when the first message is sent to avoid empty sessions.
-    }
-  }, []);
-
-  // Save sessions to local storage whenever they change
-  useEffect(() => {
-    localStorage.setItem("chat_sessions", JSON.stringify(sessions));
-  }, [sessions]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading, isTyping]);
-
-  const createNewChat = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content:
-          "Hello! I am Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image, and I'll convert it while preserving pronunciation.",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
+    const [messages, setMessages] = useState([
+        {
+            role: "assistant",
+            content:
+                "Hello! I am Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image, and I'll convert it while preserving pronunciation.",
+            timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+        },
     ]);
-    setInputText("");
-    setSelectedImage(null);
-    setCurrentSessionId(null);
-    setIsSidebarOpen(false); // Close sidebar on mobile
-  };
+    const [inputText, setInputText] = useState("");
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const fileInputRef = useRef(null);
+    const messagesEndRef = useRef(null);
 
-  const loadSession = (sessionId) => {
-    const session = sessions.find((s) => s.id === sessionId);
-    if (session) {
-      setMessages(session.messages);
-      setCurrentSessionId(sessionId);
-      setIsSidebarOpen(false);
-    }
-  };
-
-  const deleteSession = (e, sessionId) => {
-    e.stopPropagation();
-    const newSessions = sessions.filter((s) => s.id !== sessionId);
-    setSessions(newSessions);
-    if (currentSessionId === sessionId) {
-      createNewChat();
-    }
-  };
-
-  const callGroq = async (userContent, imageFile) => {
-    let imageBase64 = null;
-    if (imageFile) {
-      const reader = new FileReader();
-      imageBase64 = await new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(imageFile);
-      });
-    }
-
-    const userMessage = {
-      role: "user",
-      content: [
-        { type: "text", text: userContent || "" },
-        ...(imageBase64
-          ? [
-            {
-              type: "image_url",
-              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
-            },
-          ]
-          : []),
-      ],
-    };
-
-    const payload = {
-      model: "meta-llama/llama-4-maverick-17b-128e-instruct",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...messages.map((m) => ({
-          role: m.role,
-          content:
-            typeof m.content === "string" ? m.content : m.content[0]?.text,
-        })),
-        userMessage,
-      ],
-      temperature: 0.3,
-      max_tokens: 800,
-    };
-
-    const res = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-      },
-      body: JSON.stringify(payload),
+    const [sessions, setSessions] = useState(() => {
+        const saved = localStorage.getItem("chat_sessions");
+        return saved ? JSON.parse(saved) : [];
     });
+    const [currentSessionId, setCurrentSessionId] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "No response.";
-  };
+    // Initialize with a new chat if no sessions or just to start fresh
+    useEffect(() => {
+        if (
+            !currentSessionId &&
+            messages.length === 1 &&
+            messages[0].role === "assistant"
+        ) {
+            // It's a fresh state, do nothing or maybe create a session ID only when user types?
+            // Let's create a session ID only when the first message is sent to avoid empty sessions.
+        }
+    }, []);
 
-  const handleSend = async () => {
-    if (!inputText.trim() && !selectedImage) return;
+    // Save sessions to local storage whenever they change
+    useEffect(() => {
+        localStorage.setItem("chat_sessions", JSON.stringify(sessions));
+    }, [sessions]);
 
-    const userMessage = {
-      role: "user",
-      content: inputText.trim(),
-      image: selectedImage,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading, isTyping]);
 
-    // Handle Session Management
-    let sessionId = currentSessionId;
-    if (!sessionId) {
-      sessionId = Date.now().toString();
-      setCurrentSessionId(sessionId);
-      const newSession = {
-        id: sessionId,
-        title: userMessage.content.substring(0, 30) || "New Chat",
-        messages: updatedMessages,
-        timestamp: Date.now(),
-      };
-      setSessions((prev) => [newSession, ...prev]);
-    } else {
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId
-            ? { ...s, messages: updatedMessages, timestamp: Date.now() }
-            : s
-        )
-      );
-    }
+    const createNewChat = () => {
+        setMessages([
+            {
+                role: "assistant",
+                content:
+                    "Hello! I am Bhaasha Setu. I can help you transliterate text between Indian scripts. Send me text or an image, and I'll convert it while preserving pronunciation.",
+                timestamp: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }),
+            },
+        ]);
+        setInputText("");
+        setSelectedImage(null);
+        setCurrentSessionId(null);
+        setIsSidebarOpen(false); // Close sidebar on mobile
+    };
 
-    setInputText("");
-    setSelectedImage(null);
-    setIsLoading(true);
-    setIsTyping(true);
+    const loadSession = (sessionId) => {
+        const session = sessions.find((s) => s.id === sessionId);
+        if (session) {
+            setMessages(session.messages);
+            setCurrentSessionId(sessionId);
+            setIsSidebarOpen(false);
+        }
+    };
 
-    try {
-      const assistantContent = await callGroq(
-        userMessage.content,
-        userMessage.image
-      );
+    const deleteSession = (e, sessionId) => {
+        e.stopPropagation();
+        const newSessions = sessions.filter((s) => s.id !== sessionId);
+        setSessions(newSessions);
+        if (currentSessionId === sessionId) {
+            createNewChat();
+        }
+    };
 
-      const assistantMessage = {
-        role: "assistant",
-        content: assistantContent,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
+    const callGroq = async (userContent, imageFile) => {
+        let imageBase64 = null;
+        if (imageFile) {
+            const reader = new FileReader();
+            imageBase64 = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result.split(",")[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(imageFile);
+            });
+        }
 
-      const finalMessages = [...updatedMessages, assistantMessage];
-      setMessages(finalMessages);
+        const userMessage = {
+            role: "user",
+            content: [
+                { type: "text", text: userContent || "" },
+                ...(imageBase64
+                    ? [
+                        {
+                            type: "image_url",
+                            image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+                        },
+                    ]
+                    : []),
+            ],
+        };
 
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId
-            ? { ...s, messages: finalMessages, timestamp: Date.now() }
-            : s
-        )
-      );
-    } catch (err) {
-      console.error("Groq error:", err);
-      const errorMessage = {
-        role: "assistant",
-        content: "⚠️ Error contacting Groq API. Please try again.",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
+        const payload = {
+            model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                ...messages.map((m) => ({
+                    role: m.role,
+                    content:
+                        typeof m.content === "string" ? m.content : m.content[0]?.text,
+                })),
+                userMessage,
+            ],
+            temperature: 0.3,
+            max_tokens: 800,
+        };
 
-      const finalMessages = [...updatedMessages, errorMessage];
-      setMessages(finalMessages);
+        const res = await fetch(GROQ_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${GROQ_API_KEY}`,
+            },
+            body: JSON.stringify(payload),
+        });
 
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId
-            ? { ...s, messages: finalMessages, timestamp: Date.now() }
-            : s
-        )
-      );
-    } finally {
-      setIsLoading(false);
-      setIsTyping(false);
-    }
-  };
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        return data.choices?.[0]?.message?.content ?? "No response.";
+    };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+    const handleSend = async () => {
+        if (!inputText.trim() && !selectedImage) return;
 
-  return (
-    <div className="h-screen w-full bg-slate-50 flex font-sans text-slate-900 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat relative overflow-hidden">
-      <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-0"></div>
+        const userMessage = {
+            role: "user",
+            content: inputText.trim(),
+            image: selectedImage,
+            timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+        };
 
-      <Sidebar
-        sessions={sessions}
-        currentSessionId={currentSessionId}
-        createNewChat={createNewChat}
-        loadSession={loadSession}
-        deleteSession={deleteSession}
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
-      />
+        const updatedMessages = [...messages, userMessage];
+        setMessages(updatedMessages);
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full relative w-full md:w-auto">
-        <Header
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        />
+        // Handle Session Management
+        let sessionId = currentSessionId;
+        if (!sessionId) {
+            sessionId = Date.now().toString();
+            setCurrentSessionId(sessionId);
+            const newSession = {
+                id: sessionId,
+                title: userMessage.content.substring(0, 30) || "New Chat",
+                messages: updatedMessages,
+                timestamp: Date.now(),
+            };
+            setSessions((prev) => [newSession, ...prev]);
+        } else {
+            setSessions((prev) =>
+                prev.map((s) =>
+                    s.id === sessionId
+                        ? { ...s, messages: updatedMessages, timestamp: Date.now() }
+                        : s
+                )
+            );
+        }
 
-        <ChatArea
-          messages={messages}
-          isTyping={isTyping}
-          messagesEndRef={messagesEndRef}
-        />
+        setInputText("");
+        setSelectedImage(null);
+        setIsLoading(true);
+        setIsTyping(true);
 
-        <InputArea
-          inputText={inputText}
-          setInputText={setInputText}
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
-          fileInputRef={fileInputRef}
-          handleSend={handleSend}
-          handleKeyPress={handleKeyPress}
-          isLoading={isLoading}
-        />
-      </div>
-    </div>
-  );
+        try {
+            const assistantContent = await callGroq(
+                userMessage.content,
+                userMessage.image
+            );
+
+            const assistantMessage = {
+                role: "assistant",
+                content: assistantContent,
+                timestamp: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }),
+            };
+
+            const finalMessages = [...updatedMessages, assistantMessage];
+            setMessages(finalMessages);
+
+            setSessions((prev) =>
+                prev.map((s) =>
+                    s.id === sessionId
+                        ? { ...s, messages: finalMessages, timestamp: Date.now() }
+                        : s
+                )
+            );
+        } catch (err) {
+            console.error("Groq error:", err);
+            const errorMessage = {
+                role: "assistant",
+                content: "⚠️ Error contacting Groq API. Please try again.",
+                timestamp: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }),
+            };
+
+            const finalMessages = [...updatedMessages, errorMessage];
+            setMessages(finalMessages);
+
+            setSessions((prev) =>
+                prev.map((s) =>
+                    s.id === sessionId
+                        ? { ...s, messages: finalMessages, timestamp: Date.now() }
+                        : s
+                )
+            );
+        } finally {
+            setIsLoading(false);
+            setIsTyping(false);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    return (
+        <div className="h-screen w-full flex font-sans text-slate-900 bg-slate-50 relative overflow-hidden">
+            {/* Vibrant Modern Background */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+                <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-indigo-500/10 blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] rounded-full bg-sky-400/10 blur-[80px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+            </div>
+
+            <Sidebar
+                sessions={sessions}
+                currentSessionId={currentSessionId}
+                createNewChat={createNewChat}
+                loadSession={loadSession}
+                deleteSession={deleteSession}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+            />
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col h-full relative w-full md:w-auto">
+                <Header
+                    isSidebarOpen={isSidebarOpen}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                />
+
+                <ChatArea
+                    messages={messages}
+                    isTyping={isTyping}
+                    messagesEndRef={messagesEndRef}
+                />
+
+                <InputArea
+                    inputText={inputText}
+                    setInputText={setInputText}
+                    selectedImage={selectedImage}
+                    setSelectedImage={setSelectedImage}
+                    fileInputRef={fileInputRef}
+                    handleSend={handleSend}
+                    handleKeyPress={handleKeyPress}
+                    isLoading={isLoading}
+                />
+            </div>
+        </div>
+    );
 };
 
 export default App;
