@@ -3,12 +3,12 @@ import { Menu, Sparkles } from "lucide-react";
 
 const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
     return (
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-20 px-4 py-3 sm:px-6">
-            <div className="max-w-5xl mx-auto flex items-center justify-between relative z-10">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-20 px-4 py-3 sm:px-6 w-full">
+            <div className="w-full flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md transition-colors"
+                        className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md transition-colors"
                     >
                         <Menu size={24} />
                     </button>

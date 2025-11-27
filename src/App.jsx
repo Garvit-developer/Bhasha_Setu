@@ -115,7 +115,7 @@ const App = () => {
         return saved ? JSON.parse(saved) : [];
     });
     const [currentSessionId, setCurrentSessionId] = useState(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
 
     // Initialize with a new chat if no sessions or just to start fresh
     useEffect(() => {
@@ -336,7 +336,7 @@ const App = () => {
     };
 
     return (
-        <div className="h-screen w-full flex font-sans text-slate-900 bg-slate-50 relative overflow-hidden">
+        <div className="h-screen w-full flex flex-col font-sans text-slate-900 bg-slate-50 relative overflow-hidden">
             {/* Vibrant Modern Background */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-indigo-500/10 blur-[120px] animate-pulse"></div>
@@ -344,39 +344,42 @@ const App = () => {
                 <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] rounded-full bg-sky-400/10 blur-[80px] animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
-            <Sidebar
-                sessions={sessions}
-                currentSessionId={currentSessionId}
-                createNewChat={createNewChat}
-                loadSession={loadSession}
-                deleteSession={deleteSession}
+            {/* Top Navigation Bar */}
+            <Header
                 isSidebarOpen={isSidebarOpen}
                 setIsSidebarOpen={setIsSidebarOpen}
             />
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col h-full relative w-full md:w-auto">
-                <Header
+            <div className="flex-1 flex overflow-hidden relative z-10">
+                <Sidebar
+                    sessions={sessions}
+                    currentSessionId={currentSessionId}
+                    createNewChat={createNewChat}
+                    loadSession={loadSession}
+                    deleteSession={deleteSession}
                     isSidebarOpen={isSidebarOpen}
                     setIsSidebarOpen={setIsSidebarOpen}
                 />
 
-                <ChatArea
-                    messages={messages}
-                    isTyping={isTyping}
-                    messagesEndRef={messagesEndRef}
-                />
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col h-full relative w-full min-w-0">
+                    <ChatArea
+                        messages={messages}
+                        isTyping={isTyping}
+                        messagesEndRef={messagesEndRef}
+                    />
 
-                <InputArea
-                    inputText={inputText}
-                    setInputText={setInputText}
-                    selectedImage={selectedImage}
-                    setSelectedImage={setSelectedImage}
-                    fileInputRef={fileInputRef}
-                    handleSend={handleSend}
-                    handleKeyPress={handleKeyPress}
-                    isLoading={isLoading}
-                />
+                    <InputArea
+                        inputText={inputText}
+                        setInputText={setInputText}
+                        selectedImage={selectedImage}
+                        setSelectedImage={setSelectedImage}
+                        fileInputRef={fileInputRef}
+                        handleSend={handleSend}
+                        handleKeyPress={handleKeyPress}
+                        isLoading={isLoading}
+                    />
+                </div>
             </div>
         </div>
     );
