@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Toaster, toast } from 'sonner';
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import ChatArea from "./components/ChatArea";
@@ -311,6 +312,7 @@ const App = () => {
                     minute: "2-digit",
                 }),
             };
+            toast.error("Failed to send message. Please try again.");
 
             const finalMessages = [...updatedMessages, errorMessage];
             setMessages(finalMessages);
@@ -381,6 +383,7 @@ const App = () => {
                     />
                 </div>
             </div>
+            <Toaster position="top-center" richColors />
         </div>
     );
 };

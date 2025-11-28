@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Bot, User } from 'lucide-react';
+import { Copy, Check, Bot, User, Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -13,7 +14,17 @@ const MessageBubble = ({ message }) => {
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
         setCopied(true);
+        toast.success("Copied to clipboard!");
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleSpeak = () => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(typeof message.content === 'string' ? message.content : "Content not available");
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert("Text-to-Speech is not supported in this browser.");
+        }
     };
 
     return (
@@ -107,9 +118,31 @@ const MessageBubble = ({ message }) => {
                             )}
                         </div>
                     </div>
-                    <span className="text-[10px] text-slate-400 mt-1 px-1 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        {message.timestamp}
-                    </span>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[10px] text-slate-400 font-medium">
+                            {message.timestamp}
+                        </span>
+                        {isAssistant && (
+                            <>
+                                <button
+                                    onClick={() => handleCopy(message.content)}
+                                    className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                    title="Copy message"
+                                >
+                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                                </button>
+                                <button
+                                    onClick={handleSpeak}
+                                    className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                    title="Read aloud"
+                                >
+                                    <Volume2 size={12} />
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </motion.div>
