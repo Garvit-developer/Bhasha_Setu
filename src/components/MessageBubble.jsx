@@ -18,10 +18,64 @@ const MessageBubble = ({ message }) => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleSpeak = () => {
+    const handleSpeak = (type) => {
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(typeof message.content === 'string' ? message.content : "Content not available");
-            window.speechSynthesis.speak(utterance);
+            window.speechSynthesis.cancel();
+
+            const content = typeof message.content === 'string' ? message.content : "Content not available";
+            let textToSpeak = content;
+
+            const translitStartRegex = /Transliteration.*?:/i;
+            const translationStartRegex = /Translation.*?:/i;
+
+            const startMatch = content.match(translitStartRegex);
+            const translationMatch = content.match(translationStartRegex);
+
+            if (type === 'transliteration') {
+                if (startMatch) {
+                    const startIndex = startMatch.index + startMatch[0].length;
+                    const endIndex = translationMatch ? translationMatch.index : content.length;
+                    textToSpeak = content.substring(startIndex, endIndex);
+                } else {
+                    if (translationMatch) {
+                        textToSpeak = content.substring(0, translationMatch.index);
+                    }
+                }
+            } else if (type === 'translation') {
+                if (translationMatch) {
+                    const startIndex = translationMatch.index + translationMatch[0].length;
+                    textToSpeak = content.substring(startIndex);
+                } else {
+                    toast.error("No translation found to read.");
+                    return;
+                }
+            }
+
+            textToSpeak = textToSpeak.replace(/^["']|["']$/g, '').trim();
+            textToSpeak = textToSpeak.replace(/^[*_]+|[*_]+$/g, '').trim();
+
+            console.log(`[TTS Debug] Type: ${type}, Text:`, textToSpeak);
+
+            if (textToSpeak) {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+
+                const voices = window.speechSynthesis.getVoices();
+                console.log(`[TTS Debug] Available voices: ${voices.length}`);
+
+                const hasDevanagari = /[\u0900-\u097F]/.test(textToSpeak);
+                if (hasDevanagari) {
+                    utterance.lang = 'hi-IN';
+                }
+                console.log(`[TTS Debug] Setting lang to: ${utterance.lang}`);
+
+                utterance.onstart = () => console.log("[TTS Debug] Speech started");
+                utterance.onend = () => console.log("[TTS Debug] Speech ended");
+                utterance.onerror = (e) => console.error("[TTS Debug] Speech error:", e);
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                toast.error("Could not extract text to speak.");
+            }
         } else {
             alert("Text-to-Speech is not supported in this browser.");
         }
@@ -120,7 +174,7 @@ const MessageBubble = ({ message }) => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2 mt-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-3 mt-2 px-1 transition-opacity">
                         <span className="text-[10px] text-slate-400 font-medium">
                             {message.timestamp}
                         </span>
@@ -128,17 +182,30 @@ const MessageBubble = ({ message }) => {
                             <>
                                 <button
                                     onClick={() => handleCopy(message.content)}
-                                    className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                    className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
                                     title="Copy message"
                                 >
-                                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
                                 </button>
+
+                                <div className="h-4 w-px bg-slate-200 mx-1"></div>
+
                                 <button
-                                    onClick={handleSpeak}
-                                    className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
-                                    title="Read aloud"
+                                    onClick={() => handleSpeak('transliteration')}
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                                    title="Read Transliteration"
                                 >
-                                    <Volume2 size={12} />
+                                    <Volume2 size={16} />
+                                    <span className="text-xs font-medium">Transliteration</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handleSpeak('translation')}
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors"
+                                    title="Read Translation"
+                                >
+                                    <Volume2 size={16} />
+                                    <span className="text-xs font-medium">Translation</span>
                                 </button>
                             </>
                         )}
