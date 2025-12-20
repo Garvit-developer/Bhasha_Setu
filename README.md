@@ -2,49 +2,79 @@
 
 **Bhaasha Setu** is an advanced AI-powered chatbot designed to bridge linguistic barriers across India. It specializes in **transliterating** text between various Indian scripts, enabling users to read content in their familiar script while preserving the original phonetic sound and language.
 
-> **Core Principle:** "Only change the script, never the language or meaning."
+> **Core Principle:**  
+> **"Only change the script, never the language or meaning."**
 >
-> 💡 **Inspiration:** This project idea is based on a problem statement from the **Smart India Hackathon (SIH)**.
+> 💡 **Inspiration:** This project is inspired by a real-world problem statement from the **Smart India Hackathon (SIH)**, addressing India’s vast linguistic diversity.
+
+---
 
 ## 🚀 Features
 
-*   **Smart Transliteration:** Converts text from one script to another while maintaining accurate pronunciation.
-*   **Dual Output System:**
-    *   **Transliteration:** The original content rendered in the target script.
-    *   **Translation:** The meaning of the content in the same language.
-*   **Multi-Modal Input:**
-    *   **Text:** Type directly into the chat.
-    *   **Images:** Upload images containing Indian script text for extraction and conversion.
-*   **Context Aware:** Preserves formatting, punctuation, numbers, and capitalization.
+### 🔤 Smart Transliteration
+- Converts text from one Indian script to another **without changing the language**
+- Maintains **phonetic accuracy**, pronunciation, and readability
+
+### 🔁 Dual Output System
+- **Transliteration Output:** Same language, different script
+- **Translation Output:** Meaning of the content for better understanding
+
+### 🎙️ Voice-Enabled Interaction
+- **Voice Input:** Speak in your language instead of typing
+- **Voice Output:** Hear both **transliteration and translation** in natural-sounding speech
+- Enables **hands-free and accessibility-friendly usage**
+
+### 🌐 Multi-Language Support
+- Integrated **language selector dropdown** with multiple Indian languages, as shown in the UI:
+  - Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati
+  - Kannada, Malayalam, Punjabi
+  - English (India)
+- Instant switching between source and target scripts
+
+### 🖼️ Multi-Modal Input
+- **Text Input:** Type directly into the chat
+- **Image Upload:** Extract text from images containing Indian script and transliterate it
+
+### 🧠 Context-Aware Processing
+- Preserves:
+  - Formatting
+  - Punctuation
+  - Numbers
+  - Capitalization
+- Ensures output feels **natural and authentic**
+
+---
 
 ## 📜 Supported Scripts
 
-**North Indian:**
-*   Devanagari (Hindi, Marathi, Sanskrit, Nepali)
-*   Bengali–Assamese
-*   Gujarati
-*   Odia (Oriya)
-*   Gurmukhi (Punjabi)
-*   Kashmiri, Maithili, Dogri
+### North Indian Scripts
+- Devanagari (Hindi, Marathi, Sanskrit)
+- Bengali–Assamese
+- Gujarati
+- Odia (Oriya)
+- Gurmukhi (Punjabi)
 
-**South Indian:**
-*   Tamil
-*   Telugu
-*   Kannada
-*   Malayalam
+### South Indian Scripts
+- Tamil
+- Telugu
+- Kannada
+- Malayalam
 
-**Other / Ancient:**
-*   Perso-Arabic (Urdu)
-*   Sharada, Grantha
-*   Brahmi, Kharosthi, Indus Script
+---
 
 ## 🛠️ Tech Stack
 
-*   **Frontend:** [React 19](https://react.dev/)
-*   **Build Tool:** [Vite 7](https://vitejs.dev/)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-*   **Icons:** [Lucide React](https://lucide.dev/)
-*   **AI Integration:** [Groq API](https://groq.com/) (Model: `meta-llama/llama-4-maverick-17b-128e-instruct`)
+- **Frontend:** React 19
+- **Build Tool:** Vite 7
+- **Styling:** Tailwind CSS
+- **Icons:** Lucide React
+- **AI Integration:** Groq API  
+  - Model: `meta-llama/llama-4-maverick-17b-128e-instruct`
+- **Speech Features:**
+  - Voice Input (Speech-to-Text)
+  - Voice Output (Text-to-Speech)
+
+---
 
 ## ⚙️ Installation & Setup
 
