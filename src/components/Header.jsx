@@ -8,8 +8,8 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 sticky top-0 z-30 w-full
                 bg-[#0f1117]/90 backdrop-blur
                 border-b border-white/5
-                px-2 sm:px-2
-                h-12
+                px-2 sm:px-2 py-0.5
+                h-15
             "
         >
             <div className="h-full flex items-center justify-between w-full px-4  mx-auto">
@@ -35,33 +35,15 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     <div className="flex items-center gap-2.5">
                         <div
                             className="
-                                w-7 h-7
-                                bg-gradient-to-br from-indigo-500 to-violet-600
-                                rounded-md
+                                w-12 h-12
                                 flex items-center justify-center
-                                text-white
-                                shadow shadow-indigo-500/20
-                            "
+                                text-white"
                         >
-                            <Sparkles size={14} />
+                            <img src="/Logo.png" alt="bhasha setu logo" />
                         </div>
 
                         <h1 className="text-sm sm:text-base font-semibold text-gray-100 flex items-center gap-2">
                             Bhasha Setu
-                            <span
-                                className="
-                                    px-1.5 py-[1px]
-                                    bg-indigo-500/10
-                                    text-indigo-400
-                                    rounded
-                                    text-[9px]
-                                    font-semibold
-                                    border border-indigo-500/20
-                                    uppercase tracking-wide
-                                "
-                            >
-                                Beta
-                            </span>
                         </h1>
                     </div>
                 </div>

@@ -211,7 +211,7 @@ const MessageBubble = ({ message }) => {
                                     onClick={() =>
                                         handleSpeak("transliteration")
                                     }
-                                    className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300"
+                                    className="flex items-center gap-1 text-indigo-300 hover:text-indigo-200"
                                 >
                                     <Volume2 size={14} />
                                     Transliteration

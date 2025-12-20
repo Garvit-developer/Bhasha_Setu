@@ -73,7 +73,7 @@ const Sidebar = ({
                             className="
                                 w-full flex items-center gap-3
                                 px-4 py-3 rounded-lg
-                                bg-gradient-to-r from-indigo-500 to-violet-600
+                                bg-gradient-to-r from-[#0b5a89] to-[#05a3a6]
                                 text-white text-sm font-semibold
                                 shadow-lg shadow-indigo-500/25
                                 hover:shadow-indigo-500/40
