@@ -35,7 +35,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     <div className="flex items-center gap-2.5">
                         <div
                             className="
-                                w-12 h-12
+                                w-9 h-10
                                 flex items-center justify-center
                                 text-white"
                         >

@@ -179,26 +179,25 @@ const App = () => {
         }
     };
 
-    const callGroq = async (userContent, imageFile) => {
-        let imageBase64 = null;
-        if (imageFile) {
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            imageBase64 = await new Promise((resolve, reject) => {
-                reader.onload = () => resolve(reader.result.split(",")[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(imageFile);
-            });
-        }
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
+    const callGroq = async (userContent, imageDataUrl) => {
         const userMessage = {
             role: "user",
             content: [
                 { type: "text", text: userContent || "" },
-                ...(imageBase64
+                ...(imageDataUrl
                     ? [
                         {
                             type: "image_url",
-                            image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+                            image_url: { url: imageDataUrl },
                         },
                     ]
                     : []),
@@ -206,7 +205,7 @@ const App = () => {
         };
 
         const payload = {
-            model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+            model: "meta-llama/llama-3.2-90b-vision-preview", // Updated to Vision capable model
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 ...messages.map((m) => ({
@@ -237,10 +236,21 @@ const App = () => {
     const handleSend = async () => {
         if (!inputText.trim() && !selectedImage) return;
 
+        let imageDataUrl = null;
+        if (selectedImage) {
+            try {
+                imageDataUrl = await convertToBase64(selectedImage);
+            } catch (error) {
+                console.error("Error converting image:", error);
+                toast.error("Failed to process image.");
+                return;
+            }
+        }
+
         const userMessage = {
             role: "user",
             content: inputText.trim(),
-            image: selectedImage,
+            image: imageDataUrl, // Store Base64 string
             timestamp: new Date().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",

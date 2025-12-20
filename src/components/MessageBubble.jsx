@@ -20,7 +20,7 @@ const MessageBubble = ({ message }) => {
 
     const handleSpeak = (type) => {
         if (!("speechSynthesis" in window)) {
-            alert("Text-to-Speech is not supported");
+            toast.error("Text-to-Speech not supported");
             return;
         }
 
@@ -31,38 +31,45 @@ const MessageBubble = ({ message }) => {
                 ? message.content
                 : "Content not available";
 
-        let textToSpeak = content;
+        let textToSpeak = "";
 
-        const translitRegex = /Transliteration.*?:/i;
-        const translationRegex = /Translation.*?:/i;
-
-        const tStart = content.match(translitRegex);
-        const trStart = content.match(translationRegex);
+        // Robust regex to find sections
+        // Matches "Transliteration" or "Translation" optionally surrounded by markdown (** or ##)
+        // followed by optional colon, hyphen or whitespace
+        const translitMatch = content.match(/(?:\*\*|##)?\s*Transliteration(?:\*\*|##)?[:\s-]*/i);
+        const translationMatch = content.match(/(?:\*\*|##)?\s*Translation(?:\*\*|##)?[:\s-]*/i);
 
         if (type === "transliteration") {
-            if (tStart) {
-                const start = tStart.index + tStart[0].length;
-                const end = trStart ? trStart.index : content.length;
+            if (translitMatch) {
+                const start = translitMatch.index + translitMatch[0].length;
+                const end = translationMatch ? translationMatch.index : content.length;
                 textToSpeak = content.substring(start, end);
             }
-        }
-
-        if (type === "translation") {
-            if (trStart) {
-                textToSpeak = content.substring(
-                    trStart.index + trStart[0].length
-                );
-            } else {
-                toast.error("No translation found");
-                return;
+        } else if (type === "translation") {
+            if (translationMatch) {
+                const start = translationMatch.index + translationMatch[0].length;
+                textToSpeak = content.substring(start);
             }
         }
 
-        textToSpeak = textToSpeak.replace(/[*_"']/g, "").trim();
-        if (!textToSpeak) return;
+        // Clean up markdown and extra whitespace
+        textToSpeak = textToSpeak.replace(/[*_`#"]/g, "").trim();
+
+        if (!textToSpeak) {
+            // Fallback: If specific section not found, maybe speak whole message if short?
+            // Or just notify user.
+            toast.error(`Could not find ${type} content`);
+            return;
+        }
 
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        if (/[\u0900-\u097F]/.test(textToSpeak)) utterance.lang = "hi-IN";
+
+        // Detect Hindi characters to switch voice/lang
+        if (/[\u0900-\u097F]/.test(textToSpeak)) {
+            utterance.lang = "hi-IN";
+        } else {
+            utterance.lang = "en-IN";
+        }
 
         window.speechSynthesis.speak(utterance);
     };
@@ -89,7 +96,7 @@ const MessageBubble = ({ message }) => {
                         "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md",
                         isAssistant
                             ? "bg-[#1c1f26] text-indigo-400 border border-white/10"
-                            : "bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-indigo-500/30"
+                            : "bg-gradient-to-r from-[#0a6a90]/70 to-[#05a3a6]/70 text-white shadow-indigo-500/30"
                     )}
                 >
                     {isAssistant ? <Bot size={18} /> : <User size={16} />}
@@ -107,17 +114,36 @@ const MessageBubble = ({ message }) => {
                             "px-5 py-3.5 rounded-2xl relative group transition",
                             isAssistant
                                 ? "bg-[#1c1f26] text-gray-200 border border-white/10 rounded-tl-none"
-                                : "bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-tr-none shadow-lg shadow-indigo-500/25"
+                                : "bg-gradient-to-r from-[#0a6a90]/70 to-[#05a3a6]/70 text-white rounded-tr-none shadow-lg shadow-indigo-500/25"
                         )}
                     >
                         {/* Image */}
-                        {message.image && (
-                            <img
-                                src={URL.createObjectURL(message.image)}
-                                alt="Uploaded"
-                                className="mb-3 rounded-lg border border-white/10 max-h-80 object-cover"
-                            />
-                        )}
+                        {/* Image */}
+                        {(() => {
+                            let imageSrc = null;
+                            try {
+                                if (typeof message.image === "string" && message.image.trim() !== "") {
+                                    imageSrc = message.image;
+                                } else if (message.image instanceof File || message.image instanceof Blob) {
+                                    imageSrc = URL.createObjectURL(message.image);
+                                }
+                            } catch (e) {
+                                console.error("Error creating image URL:", e);
+                            }
+
+                            if (!imageSrc) return null;
+
+                            return (
+                                <img
+                                    src={imageSrc}
+                                    alt="Uploaded"
+                                    className="mb-3 rounded-lg border border-white/10 max-h-80 object-cover"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            );
+                        })()}
 
                         {/* Markdown */}
                         <div className="prose prose-invert prose-sm max-w-none break-words">
