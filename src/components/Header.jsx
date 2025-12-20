@@ -31,7 +31,7 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     >
                         <Menu size={20} />
                     </button>
-
+                        <a href="/">
                     <div className="flex items-center gap-2.5">
                         <div
                             className="
@@ -39,13 +39,14 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }) => {
                                 flex items-center justify-center
                                 text-white"
                         >
-                            <img src="/Logo.png" alt="bhasha setu logo" />
+                            <img src="/favicon.png" alt="bhasha setu logo" />
                         </div>
 
                         <h1 className="text-sm sm:text-base font-semibold text-gray-100 flex items-center gap-2">
                             Bhasha Setu
                         </h1>
                     </div>
+                    </a>
                 </div>
             </div>
         </header>

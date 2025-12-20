@@ -174,35 +174,36 @@ const InputArea = ({
                     />
 
                     {/* Textarea */}
-                    <div className="flex-1 relative">
-                        {isListening ? (
+                    <div className="flex-1 relative min-h-[24px]">
+                        <textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            placeholder={`Message Bhaasha Setu (${languages.find(l => l.code === selectedLanguage)?.name})…`}
+                            rows={1}
+                            className="
+                                w-full resize-none
+                                bg-transparent
+                                text-gray-100
+                                placeholder:text-gray-500
+                                text-sm leading-relaxed
+                                outline-none ring-0 focus:outline-none focus:ring-0
+                            "
+                            style={{ minHeight: "24px" }}
+                        />
+
+                        {/* Voice Visualizer Overlay */}
+                        {isListening && (
                             <div className="
                                 absolute inset-0
-                                flex items-center justify-center
-                                bg-[#1c1f26] z-10
+                                flex items-center justify-center gap-2
+                                bg-[#1c1f26] rounded-lg z-20
                             ">
                                 <VoiceVisualizer />
-                                <span className="ml-2 text-sm text-indigo-400 animate-pulse">
+                                <span className="text-sm text-indigo-400 animate-pulse">
                                     Listening ({languages.find(l => l.code === selectedLanguage)?.name})…
                                 </span>
                             </div>
-                        ) : (
-                            <textarea
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                onKeyDown={handleKeyPress}
-                                placeholder={`Message Bhaasha Setu (${languages.find(l => l.code === selectedLanguage)?.name})…`}
-                                rows={1}
-                                className="
-                                    w-full resize-none
-                                    bg-transparent
-                                    text-gray-100
-                                    placeholder:text-gray-500
-                                    text-sm leading-relaxed
-                                    outline-none ring-0 focus:outline-none focus:ring-0
-                                "
-                                style={{ minHeight: "24px" }}
-                            />
                         )}
                     </div>
 
