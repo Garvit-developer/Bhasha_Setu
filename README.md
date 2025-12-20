@@ -1,8 +1,5 @@
 # Bhaasha Setu (Indian Script Transliterator)
 
-![Bhaasha Setu Banner](https://via.placeholder.com/1200x400?text=Bhaasha+Setu+Banner) 
-*(Note: Replace with actual banner if available)*
-
 **Bhaasha Setu** is an advanced AI-powered chatbot designed to bridge linguistic barriers across India. It specializes in **transliterating** text between various Indian scripts, enabling users to read content in their familiar script while preserving the original phonetic sound and language.
 
 > **Core Principle:** "Only change the script, never the language or meaning."
